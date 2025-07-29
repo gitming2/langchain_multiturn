@@ -16,6 +16,10 @@ st.title("랭체인 멀티턴 챗봇")
 
 #-------------- 초기 세팅
 if "chain" not in st.session_state:
+    if not os.getenv("UPSTAGE_API_KEY"):
+        st.error("UPSTAGE_API_KEY 환경변수를 설정해주세요.")
+        st.stop()
+        
     chat = ChatUpstage(api_key=os.getenv("UPSTAGE_API_KEY"))
 
     prompt = ChatPromptTemplate.from_messages(
@@ -35,6 +39,10 @@ if "chain" not in st.session_state:
 
 # 대화 기록이 없으면 메세지 초기화
 if "messages" not in st.session_state:
+    if not os.getenv("UPSTAGE_API_KEY"):
+        st.error("UPSTAGE_API_KEY 환경변수를 설정해주세요.")
+        st.stop()
+        
     st.session_state.messages = []
 
 # 기존 메세지 표시 # 질문할 때마다 이전 메세지 사라지고 새로운 답 뜨는 거 방지
@@ -49,12 +57,15 @@ if user_prompt := st.chat_input("질문을 입력하세요."):
         st.markdown(user_prompt)
           
     with st.chat_message("assistant"):
-        result = st.session_state.chain.stream({
-            "messages": st.session_state.messages
-        })
-        
-        # st.write_stream 주어진 시퀀스를 반복하며 모든 청크를 앱에 씀
-        # -> 문자열 청크는 타자기 효과를 사용하여 작성됨
-        full_response = st.write_stream(result)
-        
-    st.session_state.messages.append({"role": "assistant","content": full_response})
+        try:
+            result = st.session_state.chain.stream({
+                "messages": st.session_state.message
+            })
+            
+            # st.write_stream 주어진 시퀀스를 반복하며 모든 청크를 앱에 씀
+            # -> 문자열 청크는 타자기 효과를 사용하여 작성됨
+            full_response = st.write_stream(result)
+            st.session_state.messages.append({"role": "assistant","content": full_response})
+            
+        except Exception as e:
+            st.error(f"답변 생성 중 에러:{e}")
