@@ -1,0 +1,5 @@
+streamlit
+langchain-upstage
+transformers
+torch
+python-dotenv
