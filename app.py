@@ -7,40 +7,54 @@ import streamlit as st
 
 # 환경변수에 키 불러오기
 load_dotenv()
-api_key = os.getenv("UPSTAGE_API_KEY")
 
-chat = ChatUpstage(api_key=os.getenv("UPSTAGE_API_KEY"))
+st.set_page_config(
+         page_title="중간평가 챗봇",
+         page_icon="🤖",
+     )
+st.title("랭체인 멀티턴 챗봇")
 
-prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            "You are a helpful assistant. Answer all questions to the best of your ability. You must anwer with Korean.",
-        ),
-        MessagesPlaceholder("messages"), # 이전에 나눴던 대화 불러오기
-    ]
-)
+#-------------- 초기 세팅
+if "chain" not in st.session_state:
+    chat = ChatUpstage(api_key=os.getenv("UPSTAGE_API_KEY"))
 
-# prompt와 chat(언어 모델)을 연결하여 하나의 처리 흐름(chain)을 만드는 pipe(|)
-chain = prompt | chat # 랭체인에서 사용되는 문법
-
-# 연속적인 대화를 위해 이전 대화를 list에 저장하기 위한 초기화
-chat_history = []
-
-while True:
-    user_input = input("질문(종료하려면 '끝' 입력): ")
-    if user_input == '끝':
-        break
-    
-    # 현재 질문을 chat_history에 저장
-    chat_history.append(("user", user_input))
-
-    ai_msg = chain.invoke(
-        {
-            "messages": chat_history
-        }
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are a helpful assistant. Answer all questions to the best of your ability. You must anwer with Korean.",
+            ),
+            MessagesPlaceholder("messages"), # 이전에 나눴던 대화 불러오기
+        ]
     )
-    print(ai_msg.content)
+
+    # prompt와 chat(언어 모델)을 연결하여 하나의 처리 흐름(chain)을 만드는 pipe(|)
+    st.session_state.chain = prompt | chat # 랭체인에서 사용되는 문법
+#-----------------
+
+
+# 대화 기록이 없으면 메세지 초기화
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# 기존 메세지 표시 # 질문할 때마다 이전 메세지 사라지고 새로운 답 뜨는 거 방지
+for message in st.session_state.messages:
+    with st.chat_message(message['role']):
+        st.markdown(message['content'])
+
+if user_prompt := st.chat_input("질문을 입력하세요."):
+    st.session_state.messages.append({"role": "user","content": user_prompt})
     
-    # 현재 ai의 답변 chat_history에 저장
-    chat_history.append(("ai", ai_msg.content))
+    with st.chat_message("user"):
+        st.markdown(user_prompt)
+          
+    with st.chat_message("assistant"):
+        result = st.session_state.chain.stream({
+            "messages": st.session_state.messages
+        })
+        
+        # st.write_stream 주어진 시퀀스를 반복하며 모든 청크를 앱에 씀
+        # -> 문자열 청크는 타자기 효과를 사용하여 작성됨
+        full_response = st.write_stream(result)
+        
+    st.session_state.messages.append({"role": "assistant","content": full_response})
