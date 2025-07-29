@@ -1,11 +1,11 @@
 from langchain_upstage import ChatUpstage
 from langchain_core.prompts import ChatPromptTemplate
 import os
-from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import streamlit as st
+from dotenv import load_dotenv
 
-# 환경변수에 키 불러오기
+# 환경변수 불러오기
 load_dotenv()
 
 st.set_page_config(
@@ -16,11 +16,13 @@ st.title("랭체인 멀티턴 챗봇")
 
 #-------------- 초기 세팅
 if "chain" not in st.session_state:
+    api_key = os.getenv("UPSTAGE_API_KEY")
+    
     if not os.getenv("UPSTAGE_API_KEY"):
         st.error("UPSTAGE_API_KEY 환경변수를 설정해주세요.")
         st.stop()
         
-    chat = ChatUpstage(api_key=os.getenv("UPSTAGE_API_KEY"))
+    chat = ChatUpstage(api_key=api_key)
 
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -59,7 +61,7 @@ if user_prompt := st.chat_input("질문을 입력하세요."):
     with st.chat_message("assistant"):
         try:
             result = st.session_state.chain.stream({
-                "messages": st.session_state.message
+                "messages": st.session_state.messages
             })
             
             # st.write_stream 주어진 시퀀스를 반복하며 모든 청크를 앱에 씀
