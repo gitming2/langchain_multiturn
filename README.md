@@ -1,4 +1,4 @@
-# 🧠 랭체인과 감정 분석을 활용한 AI 챗봇
+# 🦜⛓️ 랭체인과 감정 분석을 활용한 AI 챗봇
 Streamlit으로 만든 대화형 AI 챗봇입니다. 
 
 LangChain 프레임워크와 Upstage의 Solar-mini 모델을 사용하여 이전 대화를 기억하는 멀티턴(multi-turn) 대화가 가능합니다. 또한, Hugging Face의 감정 분석 모델을 통해 AI 답변의 감정을 실시간으로 분석하여 보여줍니다.
