@@ -17,21 +17,30 @@ prompt = ChatPromptTemplate.from_messages(
             "system",
             "You are a helpful assistant. Answer all questions to the best of your ability. You must anwer with Korean.",
         ),
-        ("placeholder", "{messages}"),
+        MessagesPlaceholder("messages"), # 이전에 나눴던 대화 불러오기
     ]
 )
 
-chain = prompt | chat
+# prompt와 chat(언어 모델)을 연결하여 하나의 처리 흐름(chain)을 만드는 pipe(|)
+chain = prompt | chat # 랭체인에서 사용되는 문법
 
-ai_msg = chain.invoke(
-    {
-        "messages": [ # 여기가 `placeholder`에서 참조하는 {messages} 변수!
-            (
-                "human", "내 이름은 A야",
-            ),
-            ("ai", "안녕 A"),
-            ("human", "내 이름이 뭐라고?"),
-        ],
-    }
-)
-print(ai_msg.content)
+# 연속적인 대화를 위해 이전 대화를 list에 저장하기 위한 초기화
+chat_history = []
+
+while True:
+    user_input = input("질문(종료하려면 '끝' 입력): ")
+    if user_input == '끝':
+        break
+    
+    # 현재 질문을 chat_history에 저장
+    chat_history.append(("user", user_input))
+
+    ai_msg = chain.invoke(
+        {
+            "messages": chat_history
+        }
+    )
+    print(ai_msg.content)
+    
+    # 현재 ai의 답변 chat_history에 저장
+    chat_history.append(("ai", ai_msg.content))
