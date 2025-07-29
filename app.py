@@ -1,13 +1,8 @@
 from langchain_upstage import ChatUpstage
 from langchain_core.prompts import ChatPromptTemplate
-import os
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import streamlit as st
-from dotenv import load_dotenv
 from transformers import pipeline
-
-# 환경변수 불러오기
-load_dotenv()
 
 st.set_page_config(
          page_title="중간평가 챗봇",
@@ -17,9 +12,9 @@ st.title("랭체인 멀티턴 챗봇")
 
 #-------------- 초기 세팅
 if "chain" not in st.session_state:
-    api_key = os.getenv("UPSTAGE_API_KEY")
+    api_key = st.secrets["UPSTAGE_API_KEY"]
     
-    if not os.getenv("UPSTAGE_API_KEY"):
+    if "UPSTAGE_API_KEY" not in st.secrets:
         st.error("UPSTAGE_API_KEY 환경변수를 설정해주세요.")
         st.stop()
         
@@ -37,16 +32,9 @@ if "chain" not in st.session_state:
 
     # prompt와 chat(언어 모델)을 연결하여 하나의 처리 흐름(chain)을 만드는 pipe(|)
     st.session_state.chain = prompt | chat # 랭체인에서 사용되는 문법
-#-----------------
-
-
-# 대화 기록이 없으면 메세지 초기화
-if "messages" not in st.session_state:
-    if not os.getenv("UPSTAGE_API_KEY"):
-        st.error("UPSTAGE_API_KEY 환경변수를 설정해주세요.")
-        st.stop()
-        
+    # 메세지 없으면 메세지 초기화(chain이 없으면 message도 없으니)
     st.session_state.messages = []
+#-----------------    
 
 # 기존 메세지 표시 # 질문할 때마다 이전 메세지 사라지고 새로운 답 뜨는 거 방지
 for message in st.session_state.messages:
