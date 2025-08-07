@@ -36,3 +36,66 @@ try-except 구문으로 안정적인 에러 처리를 구현했습니다.
 
 <br />
 
+# 🚀 설치 및 실행 방법
+## 1. Repository 클론
+
+```Bash
+
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+```
+(your-username와 your-repo-name은 실제 정보로 바꿔주세요.)
+
+<br />
+
+## 2. 가상환경 생성 및 실행 (권장)
+
+```Bash
+
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+<br />
+
+## 3. 필요 라이브러리 설치
+
+프로젝트 폴더에 아래 내용으로 requirements.txt 파일을 생성하고, 다음 명령어를 실행합니다.
+
+```
+# requirements.txt
+streamlit
+langchain-upstage
+transformers
+torch
+python-dotenv
+Bash
+```
+
+```Bash
+pip install -r requirements.txt
+```
+
+<br />
+
+## 4. API 키 설정
+
+프로젝트 최상위 폴더에 .env 파일을 생성하고, 아래와 같이 Upstage API 키를 입력합니다.
+
+```
+# .env
+UPSTAGE_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+<br />
+
+## 5. 챗봇 실행
+
+```Bash
+streamlit run app.py
+```
